@@ -14,3 +14,18 @@ If you have `auditd` and `apparmor-notify` installed, you can have desktop notif
 ```
 sudo aa-notify -p -f /var/log/audit/audit.log
 ```
+
+## Queries
+
+Some examples of `osquery` queries. 
+
+You need an admin access to FleetDM manager to run them.
+
+```
+SELECT * FROM usb_devices WHERE removable = 1;
+SELECT * FROM processes;
+SELECT * FROM file where path like "/etc/ssh/%";
+SELECT * FROM process_open_files;
+SELECT * FROM process_open_sockets;
+SELECT * FROM mounts;
+```
