@@ -29,3 +29,11 @@ SELECT * FROM process_open_files;
 SELECT * FROM process_open_sockets;
 SELECT * FROM mounts;
 ```
+
+## Todo
+
+### File Carving
+
+Explore file carving : https://osquery.readthedocs.io/en/latest/deployment/file-carving/
+
+An example of implementation here : https://zercurity.medium.com/file-retrieval-with-osquery-using-carves-on-zercurity-9b157f7c0801
