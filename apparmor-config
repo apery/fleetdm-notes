@@ -1,0 +1,129 @@
+# vim:syntax=apparmor
+# AppArmor policy for orbit
+# ###AUTHOR###
+# ###COPYRIGHT###
+# ###COMMENT###
+
+#include <tunables/global>
+
+# No template variables specified
+
+/opt/orbit/bin/orbit/linux/stable/orbit {
+  #include <abstractions/base>
+
+  # No abstractions specified
+
+  # No policy groups specified
+
+  # Specified read/write permissions
+  /opt/orbit/ rwk,
+  /opt/orbit/** rwk,
+ 
+  # /etc permissions 
+  /etc/ r,
+  /etc/** r,
+  /etc/lvm/cache/** rwk,
+  deny /etc/shadow rw,
+  #deny /etc/passwd rw,
+  #deny /etc/group rw,
+  deny /etc/openvpn/ rw,
+  deny /etc/wireguard/ rw,
+  deny /etc/bind/ rw,
+  deny /etc/wpa_supplicant/ rw,
+  deny /etc/apparmor** rw,
+  deny /etc/fstab rw,
+
+  # /lib permissions
+  /usr/lib/ r,
+  /usr/lib/** r,
+  /usr/local/lib/ r,
+  /usr/local/lib/** r,
+  /var/lib/dpkg/** r,
+
+  # tls certificates (mandatory for connection to the server)
+  /etc/ssl/certs/** r,
+  /usr/share/ca-certificates/** r,
+
+  # /sys permissions
+  /sys/** r,
+
+  # /proc permissions
+  /proc/ r,
+  /proc/** r,
+  # deny @{PROC}/@{pid}/mount* r,
+  owner @{PROC}/@{pid}/* r,
+  owner @{PROC}/@{pid}/task/[0-9]*/comm rw,
+  deny other @{PROC}/@{pid}/* r, # might be not ok in the future 😕
+
+  # tmp permissions
+  /tmp/ rw,
+  /tmp/** rw,
+  /var/tmp/ rw,
+  /var/tmp/** rw,
+
+  # /run permission
+  /run/systemd/resolve/stub-resolv.conf r,
+  /run/systemd/userdb/ r,
+  # deny /run/** rw,
+  /run/udev/data/* r, #luks
+  /run/lock/** rwk, #luks
+
+  # home folders (deny all ⛔)
+  deny /root/ rw,
+  deny /root/** rw,
+  deny /home/ rw,
+  deny /home/** rw,
+  
+  # /dev permissions (deny sound card and camera at least 📸)
+  /dev/ r,
+  /dev/** r,
+  /dev/null rw,
+  /dev/mapper/control rw,
+  deny /dev/mem rw,
+  deny /dev/video** rw,
+  deny /dev/snd** rw,
+ 
+  # Specified execution permissions
+  /opt/orbit/bin/osqueryd/linux/stable/osqueryd cix,
+  
+  # Fleet Desktop (choose between 1) or 2))
+  # 1) deny completly
+  deny /opt/orbit/bin/desktop/linux/stable/fleet-desktop/fleet-desktop x,
+  deny /usr/bin/users x,
+
+###  # 2) enough permission to get FLEET_DESKTOP_DEVICE_URL
+###  #    but not enough to make it run
+###  /opt/orbit/bin/desktop/linux/stable/fleet-desktop/fleet-desktop cix,
+###  /usr/bin/users cix,
+###  /usr/bin/id cix,
+###  /usr/bin/loginctl cix,
+###  /run/user/1000/ r,
+###  /run/user/1000/** r,
+###  /usr/bin/sudo cix, # 😕
+###  /usr/libexec/sudo/** rm,
+###  /run/utmp rk,
+###  deny /dev/tty** rw,
+###  capability setuid,
+###  deny capability sys_resource,
+###  deny capability net_admin,
+  
+  # Capabilities
+  capability dac_read_search, # luks
+  capability sys_admin, # luks 😕
+  deny capability sys_ptrace,
+  deny capability dac_override,
+  deny capability setgid,
+  #deny capability net_admin,
+  audit capability kill,
+ 
+  # Network access
+  network inet dgram,
+  network inet stream,
+  network netlink raw,
+  deny network netlink dgram,
+  deny network inet6 dgram,
+
+  # ptrace
+  deny ptrace (read),
+}
+
