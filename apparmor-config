@@ -16,13 +16,18 @@
   # No policy groups specified
 
   # Specified read/write permissions
+  
+  # Mandatory for orbit startup
   /opt/orbit/ rwk,
   /opt/orbit/** rwk,
+  /etc/ssl/certs/** r, # tls connection to the server
+  /usr/share/ca-certificates/** r,
  
   # /etc permissions 
   /etc/ r,
   /etc/** r,
   /etc/lvm/cache/** rwk,
+  deny /etc/.git/ rw, #etckeeper
   deny /etc/shadow rw,
   #deny /etc/passwd rw,
   #deny /etc/group rw,
@@ -32,6 +37,7 @@
   deny /etc/wpa_supplicant/ rw,
   deny /etc/apparmor** rw,
   deny /etc/fstab rw,
+  deny /etc/dhcp rw,
 
   # /lib permissions
   /usr/lib/ r,
@@ -40,20 +46,16 @@
   /usr/local/lib/** r,
   /var/lib/dpkg/** r,
 
-  # tls certificates (mandatory for connection to the server)
-  /etc/ssl/certs/** r,
-  /usr/share/ca-certificates/** r,
-
   # /sys permissions
   /sys/** r,
 
   # /proc permissions
   /proc/ r,
   /proc/** r,
-  # deny @{PROC}/@{pid}/mount* r,
+  # deny @{PROC}/@{pid}/mount* r, # if we deny, orbit is not able to check encryption
   owner @{PROC}/@{pid}/* r,
   owner @{PROC}/@{pid}/task/[0-9]*/comm rw,
-  deny other @{PROC}/@{pid}/* r, # might be not ok in the future 😕
+  deny other @{PROC}/@{pid}/* r, # block process listing
 
   # tmp permissions
   /tmp/ rw,
@@ -86,34 +88,45 @@
   # Specified execution permissions
   /opt/orbit/bin/osqueryd/linux/stable/osqueryd cix,
   
+  # Allow updates (staging folder)
+  /opt/orbit/staging/osqueryd cix,
+  /opt/orbit/staging/orbit cix,
+  /opt/orbit/staging/fleet-desktop/fleet-desktop cix,
+  
   # Fleet Desktop (choose between 1) or 2))
-  # 1) deny completly
+  # 1) deny
+  #    you can visit $ORBIT_FLEET_URL/device/$(cat /opt/orbit/identifier)
   deny /opt/orbit/bin/desktop/linux/stable/fleet-desktop/fleet-desktop x,
   deny /usr/bin/users x,
 
-###  # 2) enough permission to get FLEET_DESKTOP_DEVICE_URL
-###  #    but not enough to make it run
-###  /opt/orbit/bin/desktop/linux/stable/fleet-desktop/fleet-desktop cix,
+  # 2) allow
+#  /opt/orbit/bin/desktop/linux/stable/fleet-desktop/fleet-desktop cix,
 ###  /usr/bin/users cix,
 ###  /usr/bin/id cix,
 ###  /usr/bin/loginctl cix,
+###  /usr/bin/env cix,
+###  /usr/bin/grep cix,
+###  /usr/bin/zsh cix,
 ###  /run/user/1000/ r,
 ###  /run/user/1000/** r,
 ###  /usr/bin/sudo cix, # 😕
+###  /usr/sbin/unix_chkpwd cix,
 ###  /usr/libexec/sudo/** rm,
 ###  /run/utmp rk,
 ###  deny /dev/tty** rw,
 ###  capability setuid,
-###  deny capability sys_resource,
-###  deny capability net_admin,
-  
+###  capability setgid,
+###  capability audit_write,
+###  capability sys_resource,
+###  capability net_admin,
+
   # Capabilities
   capability dac_read_search, # luks
   capability sys_admin, # luks 😕
   deny capability sys_ptrace,
   deny capability dac_override,
   deny capability setgid,
-  #deny capability net_admin,
+  deny capability net_admin,
   audit capability kill,
  
   # Network access
