@@ -29,8 +29,6 @@
   /etc/lvm/cache/** rwk,
   deny /etc/.git/ rw, #etckeeper
   deny /etc/shadow rw,
-  #deny /etc/passwd rw,
-  #deny /etc/group rw,
   deny /etc/openvpn/ rw,
   deny /etc/wireguard/ rw,
   deny /etc/bind/ rw,
@@ -70,11 +68,13 @@
   /run/udev/data/* r, #luks
   /run/lock/** rwk, #luks
 
-  # home folders (deny all ⛔)
+  # personnal folders (deny all ⛔)
   deny /root/ rw,
   deny /root/** rw,
   deny /home/ rw,
   deny /home/** rw,
+  deny /mnt/ rw,
+  deny /mnt/** rw,
   
   # /dev permissions (deny sound card and camera at least 📸)
   /dev/ r,
@@ -93,36 +93,14 @@
   /opt/orbit/staging/orbit cix,
   /opt/orbit/staging/fleet-desktop/fleet-desktop cix,
   
-  # Fleet Desktop (choose between 1) or 2))
-  # 1) deny
-  #    you can visit $ORBIT_FLEET_URL/device/$(cat /opt/orbit/identifier)
+  # Deny fleet desktop 
+  # you still can visit $ORBIT_FLEET_URL/device/$(cat /opt/orbit/identifier
   deny /opt/orbit/bin/desktop/linux/stable/fleet-desktop/fleet-desktop x,
   deny /usr/bin/users x,
 
-  # 2) allow
-#  /opt/orbit/bin/desktop/linux/stable/fleet-desktop/fleet-desktop cix,
-###  /usr/bin/users cix,
-###  /usr/bin/id cix,
-###  /usr/bin/loginctl cix,
-###  /usr/bin/env cix,
-###  /usr/bin/grep cix,
-###  /usr/bin/zsh cix,
-###  /run/user/1000/ r,
-###  /run/user/1000/** r,
-###  /usr/bin/sudo cix, # 😕
-###  /usr/sbin/unix_chkpwd cix,
-###  /usr/libexec/sudo/** rm,
-###  /run/utmp rk,
-###  deny /dev/tty** rw,
-###  capability setuid,
-###  capability setgid,
-###  capability audit_write,
-###  capability sys_resource,
-###  capability net_admin,
-
   # Capabilities
   capability dac_read_search, # luks
-  capability sys_admin, # luks 😕
+  capability sys_admin, # luks
   deny capability sys_ptrace,
   deny capability dac_override,
   deny capability setgid,
